@@ -1,7 +1,16 @@
+"use client";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { commonService } from "@/services/common.service";
+import { useQuery } from "@tanstack/react-query";
 
-export default function Home() {
+export default function Users() {
+  const { data } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => {
+      commonService.getAll("users");
+    },
+  });
   return (
     <MainTable
       caption="List of all users of our app."
