@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+
 import {
   Card,
   CardHeader,
@@ -57,8 +57,10 @@ export function MainTable({
             <TableBody>
               {rows.map((row, i) => (
                 <TableRow key={i}>
-                  {row.map((cell) => (
-                    <TableCell key={cell?.toString()}>{cell}</TableCell>
+                  {row.map((cell, j) => (
+                    <TableCell key={`${cell?.toString()}-${i}-${j}`}>
+                      {cell}
+                    </TableCell>
                   ))}
                   <TableCell>
                     <DropdownMenu>

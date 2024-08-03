@@ -1,16 +1,33 @@
+"use client";
+
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { commonService } from "@/services/common.service";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Themes() {
+  const { data } = useQuery({
+    queryKey: ["themes"],
+    queryFn: () => {
+      return commonService.getAll("themes");
+    },
+  });
+  const tableData = data?.responseObject?.map((a) => [
+    a.id,
+    a.name,
+    a.description,
+  ]);
+
   return (
-    <MainTable
-      caption="List of all users of our app."
-      title="Themes"
-      headers={["ID", "Name", "Email", "Role", "Actions"]}
-      rows={[
-        ["1", "John Doe", "j@j.com", <Badge variant="outline">User</Badge>],
-        ["2", "Jane Doe", "j@j.com", <Badge variant="outline">User</Badge>],
-      ]}
-    />
+    <>
+      {tableData?.length > 0 ? (
+        <MainTable
+          caption="List of all themes of our app."
+          title="Themes"
+          headers={["ID", "Name", "Description", "Actions"]}
+          rows={tableData}
+        />
+      ) : null}
+    </>
   );
 }

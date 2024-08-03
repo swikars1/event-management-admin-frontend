@@ -1,16 +1,35 @@
+"use client";
+
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { commonService } from "@/services/common.service";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Accommodations() {
+  const { data } = useQuery({
+    queryKey: ["accommodations"],
+    queryFn: () => {
+      return commonService.getAll("accommodations");
+    },
+  });
+
+  const tableData = data?.responseObject?.map((a) => [
+    a.id,
+    a.name,
+    a.description,
+    a.address,
+  ]);
+
   return (
-    <MainTable
-      caption="List of all users of our app."
-      title="Accommodations"
-      headers={["ID", "Name", "Email", "Role", "Actions"]}
-      rows={[
-        ["1", "John Doe", "j@j.com", <Badge variant="outline">User</Badge>],
-        ["2", "Jane Doe", "j@j.com", <Badge variant="outline">User</Badge>],
-      ]}
-    />
+    <>
+      {tableData?.length > 0 ? (
+        <MainTable
+          caption="List of all accommodations of our app."
+          title="Accommodations"
+          headers={["ID", "Name", "Description", "Address", "Actions"]}
+          rows={tableData}
+        />
+      ) : null}
+    </>
   );
 }
