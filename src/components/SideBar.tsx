@@ -4,7 +4,7 @@ import Link from "next/link";
 export function SideBarLayout() {
   const menuItems = [
     {
-      icon: <SettingsIcon className="h-5 w-5" />,
+      icon: <UsersIcon className="h-5 w-5" />,
       label: "Users",
     },
     {
