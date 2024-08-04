@@ -72,8 +72,7 @@ export function MainTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem>Deactivate</DropdownMenuItem>
+
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-500">
                           Delete
@@ -123,8 +122,8 @@ export function MainTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem>Deactivate</DropdownMenuItem>
+                       
+                       
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-500">
                         Delete
@@ -170,8 +169,8 @@ export function MainTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem>Deactivate</DropdownMenuItem>
+                       
+                       
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-500">
                         Delete
@@ -217,8 +216,8 @@ export function MainTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem>Deactivate</DropdownMenuItem>
+                       
+                       
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-500">
                         Delete
@@ -264,8 +263,8 @@ export function MainTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem>Deactivate</DropdownMenuItem>
+                       
+                       
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-500">
                         Delete

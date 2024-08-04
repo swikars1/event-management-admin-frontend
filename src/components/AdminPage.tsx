@@ -213,7 +213,6 @@ export function AdminPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Deactivate</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -241,7 +240,6 @@ export function AdminPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Deactivate</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -269,7 +267,6 @@ export function AdminPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Deactivate</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
