@@ -34,7 +34,7 @@ export function MainTable({
   title: string;
   caption: string;
   headers: string[];
-  rows: React.ReactNode[][];
+  rows: any[];
 }) {
   return (
     <div className="p-6">
@@ -50,36 +50,47 @@ export function MainTable({
             <TableHeader>
               <TableRow>
                 {headers.map((header) => (
-                  <TableHead key={header}>{header}</TableHead>
+                  <TableHead className="capitalize" key={header}>
+                    {header}
+                  </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row, i) => (
                 <TableRow key={i}>
-                  {row.map((cell, j) => (
-                    <TableCell key={`${cell?.toString()}-${i}-${j}`}>
-                      {cell}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoveVerticalIcon className="h-5 w-5" />
-                          <span className="sr-only">More actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                  {headers.map((header, j) => {
+                    if (header === "actions") {
+                      return (
+                        <TableCell key={`${row[header]?.toString()}-${i}-${j}`}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoveVerticalIcon className="h-5 w-5" />
+                                <span className="sr-only">More actions</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {row.actions?.map((action, k) => {
+                                return (
+                                  <div key={k}>
+                                    {k !== 0 ? <DropdownMenuSeparator /> : null}
+                                    {action.component}
+                                  </div>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      );
+                    }
 
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-500">
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                    return (
+                      <TableCell key={`${row[header]?.toString()}-${i}-${j}`}>
+                        {row[header]}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableBody>
