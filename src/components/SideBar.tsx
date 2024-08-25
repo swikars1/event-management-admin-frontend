@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function SideBarLayout() {
+  const { push } = useRouter();
   const menuItems = [
     {
       icon: <UsersIcon className="h-5 w-5" />,
@@ -31,6 +33,14 @@ export function SideBarLayout() {
       icon: <SettingsIcon className="h-5 w-5" />,
       label: "Events",
     },
+    {
+      icon: <SettingsIcon className="h-5 w-5" />,
+      label: "Logout",
+      handler: () => {
+        localStorage.clear();
+        push("/signin");
+      },
+    },
   ];
 
   return (
@@ -39,17 +49,31 @@ export function SideBarLayout() {
         <h2 className="text-2xl font-bold">Dashboard</h2>
       </div>
       <nav className="flex flex-col gap-2">
-        {menuItems.map((item) => (
-          <Link
-            key={item.label}
-            href={item.label.toLowerCase()}
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
-            prefetch={false}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
+        {menuItems.map((item) => {
+          if (!item.handler) {
+            return (
+              <Link
+                key={item.label}
+                href={item.label.toLowerCase()}
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                prefetch={false}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            );
+          }
+          return (
+            <div
+              key={item.label}
+              onClick={item.handler}
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+            >
+              {item.icon}
+              {item.label}
+            </div>
+          );
+        })}
       </nav>
     </div>
   );
