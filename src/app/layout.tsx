@@ -20,10 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
-          <div className="grid grid-cols-[240px_1fr] min-h-screen w-full bg-background">
-            <SideBarLayout />
-            {children}
-          </div>
+          <div className="w-full bg-background">{children}</div>
         </ReactQueryProvider>
       </body>
     </html>

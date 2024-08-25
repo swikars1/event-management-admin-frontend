@@ -2,10 +2,30 @@
 
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 import { commonService } from "@/services/common.service";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const { push } = useRouter();
+
+  const [isClient, setIsClient] = useState(false);
+  const [token] = useLocalStorage({ key: "token", initialValue: "" });
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      push("/signin");
+    } else {
+      push("/users");
+    }
+  }, []);
+
   const { data } = useQuery({
     queryKey: ["users"],
     queryFn: () => {
