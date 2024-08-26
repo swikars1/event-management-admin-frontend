@@ -20,8 +20,8 @@ export default function Users() {
     mutationFn: commonService.deletebyId,
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "User deleted successfully",
+        title: "Deleted!",
+        description: "User deleted successfully.",
         variant: "destructive",
       });
       queryClient.invalidateQueries({
@@ -64,12 +64,14 @@ export default function Users() {
   return (
     <>
       {tableData?.length > 0 ? (
-        <MainTable
-          caption="List of all users of our app."
-          title="Users"
-          headers={["id", "name", "email", "role", "actions"]}
-          rows={tableData}
-        />
+        <>
+          <MainTable
+            caption="List of all users of our app."
+            title="Users"
+            headers={["id", "name", "email", "role", "actions"]}
+            rows={tableData}
+          />
+        </>
       ) : null}
     </>
   );

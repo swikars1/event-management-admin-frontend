@@ -2,8 +2,10 @@
 
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Events() {
   const { data } = useQuery({
@@ -12,13 +14,58 @@ export default function Events() {
       return commonService.getAll("events");
     },
   });
-  const tableData = data?.responseObject?.map((a) => [
-    a.title,
-    a.description,
-    a.startDate,
-    a.endDate,
-    a.location,
-  ]);
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteById } = useMutation({
+    mutationFn: commonService.deletebyId,
+    onSuccess: () => {
+      toast({
+        title: "Deleted!",
+        description: "Event deleted successfully.",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["events"],
+      });
+    },
+  });
+
+  function handleDelete(id: string) {
+    deleteById({ id, resource: "events" });
+  }
+
+  function handleEdit(id: string) {
+    console.log(id);
+  }
+
+  const tableData = data?.responseObject?.map((a) => ({
+    id: a.id,
+    title: a.title,
+    description: a.description,
+    startDate: a.startDate,
+    endDate: a.endDate,
+    location: a.location,
+    icon: <Badge variant="outline">Event</Badge>,
+    actions: [
+      {
+        component: (
+          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
+            Edit
+          </DropdownMenuItem>
+        ),
+      },
+      {
+        component: (
+          <DropdownMenuItem
+            onClick={() => handleDelete(a.id)}
+            className="text-red-500"
+          >
+            Delete
+          </DropdownMenuItem>
+        ),
+      },
+    ],
+  }));
 
   return (
     <>
@@ -27,12 +74,12 @@ export default function Events() {
           caption="List of all events of our app."
           title="Events"
           headers={[
-            "Title",
-            "Description",
-            "Start Date",
-            "End Date",
-            "Location",
-            "Actions",
+            "title",
+            "description",
+            "startDate",
+            "endDate",
+            "location",
+            "actions",
           ]}
           rows={tableData}
         />

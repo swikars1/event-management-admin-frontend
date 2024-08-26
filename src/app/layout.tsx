@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/lib/ReactQueryProvider";
 import { SideBarLayout } from "@/components/SideBar";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ReactQueryProvider>
           <div className="w-full bg-background">{children}</div>
+          <Toaster />
         </ReactQueryProvider>
       </body>
     </html>

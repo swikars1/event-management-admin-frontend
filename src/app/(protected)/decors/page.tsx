@@ -2,10 +2,14 @@
 
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Decors() {
+  const queryClient = useQueryClient();
+
   const { data } = useQuery({
     queryKey: ["decors"],
     queryFn: () => {
@@ -13,11 +17,53 @@ export default function Decors() {
     },
   });
 
-  const tableData = data?.responseObject?.map((a) => [
-    a.id,
-    a.name,
-    a.description,
-  ]);
+  const { mutate: deleteById } = useMutation({
+    mutationFn: commonService.deletebyId,
+    onSuccess: () => {
+      toast({
+        title: "Deleted!",
+        description: "Decors deleted successfully.",
+        variant: "destructive",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["decors"],
+      });
+    },
+  });
+
+  function handleDelete(id: string) {
+    deleteById({ id, resource: "decors" });
+  }
+
+  function handleEdit(id: string) {
+    console.log(id);
+  }
+
+  const tableData = data?.responseObject?.map((a) => ({
+    id: a.id,
+    name: a.name,
+    description: a.description,
+    icon: <Badge variant="outline">Decor</Badge>,
+    actions: [
+      {
+        component: (
+          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
+            Edit
+          </DropdownMenuItem>
+        ),
+      },
+      {
+        component: (
+          <DropdownMenuItem
+            onClick={() => handleDelete(a.id)}
+            className="text-red-500"
+          >
+            Delete
+          </DropdownMenuItem>
+        ),
+      },
+    ],
+  }));
 
   return (
     <>
@@ -25,7 +71,7 @@ export default function Decors() {
         <MainTable
           caption="List of all decors of our app."
           title="Decors"
-          headers={["ID", "Name", "Description", "Actions"]}
+          headers={["id", "name", "description", "actions"]}
           rows={tableData}
         />
       ) : null}
