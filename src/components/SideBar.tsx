@@ -34,6 +34,10 @@ export function SideBarLayout() {
       label: "Events",
     },
     {
+      icon: <UsersIcon className="h-5 w-5" />,
+      label: "Chats",
+    },
+    {
       icon: <LogOutIcon className="h-5 w-5" />,
       label: "Logout",
       handler: () => {
