@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateDecor } from "@/components/CreateDecor";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -66,15 +67,12 @@ export default function Decors() {
   }));
 
   return (
-    <>
-      {tableData?.length > 0 ? (
-        <MainTable
-          caption="List of all decors of our app."
-          title="Decors"
-          headers={["id", "name", "description", "actions"]}
-          rows={tableData}
-        />
-      ) : null}
-    </>
+    <MainTable
+      caption="List of all decors of our app."
+      title="Decors"
+      headers={["id", "name", "description", "actions"]}
+      rows={tableData}
+      createComponent={<CreateDecor />}
+    />
   );
 }

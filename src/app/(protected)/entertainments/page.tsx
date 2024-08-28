@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateEntertainment } from "@/components/CreateEntertainment";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -14,6 +15,8 @@ export default function Entertainments() {
       return commonService.getAll("entertainments");
     },
   });
+
+  console.log({data})
 
   const queryClient = useQueryClient();
 
@@ -65,15 +68,12 @@ export default function Entertainments() {
   }));
 
   return (
-    <>
-      {tableData?.length > 0 ? (
-        <MainTable
-          caption="List of all entertainments of our app."
-          title="Entertainments"
-          headers={["id", "name", "description", "type", "actions"]}
-          rows={tableData}
-        />
-      ) : null}
-    </>
+    <MainTable
+      caption="List of all entertainments of our app."
+      title="Entertainments"
+      headers={["id", "name", "description", "type", "actions"]}
+      rows={tableData}
+      createComponent={<CreateEntertainment />}
+    />
   );
 }

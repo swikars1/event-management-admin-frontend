@@ -1,13 +1,17 @@
 "use client";
 
+import { AccommodationForm } from "@/components/AccommodationForm";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function Accommodations() {
+  const [editOpen, setEditOpen] = useState();
+
   const { data } = useQuery({
     queryKey: ["accommodations"],
     queryFn: () => {
@@ -46,9 +50,7 @@ export default function Accommodations() {
     actions: [
       {
         component: (
-          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
-            Edit
-          </DropdownMenuItem>
+            <AccommodationForm id={a.id} type="edit"/>
         ),
       },
       {
@@ -65,15 +67,12 @@ export default function Accommodations() {
   }));
 
   return (
-    <>
-      {tableData?.length > 0 ? (
-        <MainTable
-          caption="List of all accommodations of our app."
-          title="Accommodations"
-          headers={["id", "name", "description", "address", "actions"]}
-          rows={tableData}
-        />
-      ) : null}
-    </>
+    <MainTable
+      caption="List of all accommodations of our app."
+      title="Accommodations"
+      headers={["id", "name", "description", "address", "actions"]}
+      rows={tableData}
+      createComponent={<AccommodationForm />}
+    />
   );
 }

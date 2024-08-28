@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateTheme } from "@/components/CreateTheme";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -65,14 +66,13 @@ export default function Themes() {
 
   return (
     <>
-      {tableData?.length > 0 ? (
         <MainTable
           caption="List of all themes of our app."
           title="Themes"
           headers={["id", "name", "description", "actions"]}
           rows={tableData}
+          createComponent={<CreateTheme /> }
         />
-      ) : null}
     </>
   );
 }

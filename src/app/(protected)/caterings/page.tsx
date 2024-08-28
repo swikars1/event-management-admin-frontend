@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateCatering } from "@/components/CreateCatering";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -65,17 +66,13 @@ export default function Caterings() {
   }));
 
   return (
-    <>
-      {tableData?.length > 0 ? (
-        <MainTable
-          caption="List of all caterings of our app."
-          title="Caterings"
-          headers={["id", "name", "description", "menu", "actions"]}
-          rows={tableData}
-        />
-      ) : (
-        <p>No Caterings</p>
-      )}
-    </>
+
+      <MainTable
+        caption="List of all caterings of our app."
+        title="Caterings"
+        headers={["id", "name", "description", "menu", "actions"]}
+        rows={tableData}
+        createComponent={<CreateCatering />}
+      />
   );
 }
