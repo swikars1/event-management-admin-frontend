@@ -50,9 +50,9 @@ export function AccommodationForm({
     reset,
   } = useForm<Inputs>({
     defaultValues: {
-      name: "sdsd",
-      description: "sd",
-      address: "d",
+      name: "",
+      description: "",
+      address: "",
     },
   });
 
