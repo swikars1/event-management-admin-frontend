@@ -15,7 +15,6 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -24,6 +23,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Badge } from "./ui/badge";
 
 export function MainTable({
   title,
@@ -69,26 +69,22 @@ export function MainTable({
                           <TableCell
                             key={`${row[header]?.toString()}-${i}-${j}`}
                           >
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoveVerticalIcon className="h-5 w-5" />
-                                  <span className="sr-only">More actions</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {row.actions?.map((action, k) => {
-                                  return (
-                                    <div key={k}>
-                                      {k !== 0 ? (
-                                        <DropdownMenuSeparator />
-                                      ) : null}
-                                      {action.component}
-                                    </div>
-                                  );
-                                })}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex gap-2" >
+                              {row.actions?.map((action, k) => {
+                                return (
+                                  <div key={k}>
+                                    {action.component}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </TableCell>
+                        );
+                      }
+                      if (header === 'role') {
+                        return (
+                          <TableCell key={`${row[header]?.toString()}-${i}-${j}`}>
+                            <Badge variant={row[header] === 'ADMIN' ? 'default' : 'secondary'}>{row[header]}</Badge>
                           </TableCell>
                         );
                       }
@@ -102,7 +98,9 @@ export function MainTable({
                 ))}
               </TableBody>
             </Table>
-          ) : <p className="text-center">No Data Yet!</p>}
+          ) : (
+            <p className="text-center">No Data Yet!</p>
+          )}
         </CardContent>
       </Card>
     </div>

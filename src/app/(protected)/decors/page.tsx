@@ -1,8 +1,9 @@
 "use client";
 
-import { CreateDecor } from "@/components/CreateDecor";
+import { DecorForm } from "@/components/DecorForm";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -36,9 +37,6 @@ export default function Decors() {
     deleteById({ id, resource: "decors" });
   }
 
-  function handleEdit(id: string) {
-    console.log(id);
-  }
 
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
@@ -48,19 +46,14 @@ export default function Decors() {
     actions: [
       {
         component: (
-          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
-            Edit
-          </DropdownMenuItem>
+          <DecorForm id={a.id} type="edit" />
         ),
       },
       {
         component: (
-          <DropdownMenuItem
-            onClick={() => handleDelete(a.id)}
-            className="text-red-500"
-          >
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
-          </DropdownMenuItem>
+          </Button>
         ),
       },
     ],
@@ -72,7 +65,7 @@ export default function Decors() {
       title="Decors"
       headers={["id", "name", "description", "actions"]}
       rows={tableData}
-      createComponent={<CreateDecor />}
+      createComponent={<DecorForm />}
     />
   );
 }

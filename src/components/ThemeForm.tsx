@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { commonService } from "@/services/common.service";
 
 type Inputs = {
@@ -21,39 +21,82 @@ type Inputs = {
   description: string;
 };
 
-export function CreateDecor() {
+
+export function ThemeForm({
+  type = "create",
+  id,
+}: {
+  type?: "edit" | "create";
+  id?: string;
+}) {
   const queryClient = useQueryClient();
+
+  const { data: oneTheme } = useQuery({
+    queryKey: ["themes", id],
+    queryFn: () => {
+      if (id) {
+        return commonService.getOne("themes", id);
+      }
+    },
+    enabled: !!id,
+  });
+
+  console.log({ oneTheme });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
-  } = useForm<Inputs>();
+    reset,
+  } = useForm<Inputs>({
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+    values: oneTheme?.responseObject,
+  });
 
-  const { mutate } = useMutation({
+  const { mutate: create } = useMutation({
     mutationFn: commonService.create,
     onSuccess: (res) => {
       console.log(res);
-      queryClient.invalidateQueries({ queryKey: ["decors"] });
-      reset()
+      queryClient.invalidateQueries({ queryKey: ["themes"] });
+      reset();
+    },
+  });
+
+  const { mutate: update } = useMutation({
+    mutationFn: commonService.update,
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["themes"] });
+      reset();
     },
   });
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log("submit called");
-    mutate({ payload: data, resource: "decors" });
+    if (id) {
+      update({ payload: data, resource: "themes", id });
+    } else {
+      create({ payload: data, resource: "themes" });
+    }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">+ Create Decor</Button>
+        {!id ? (
+          <Button variant="outline">+ Create Theme</Button>
+        ) : (
+          <Button variant="outline">Edit</Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Decor</DialogTitle>
+          <DialogTitle>{id ? "Edit Theme" : "Create New Theme"}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to add a new decor.
+          Fill out the form below and press save.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -61,7 +104,7 @@ export function CreateDecor() {
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
-              placeholder="Everest Decor"
+              placeholder="Everest Theme"
               {...register("name", { required: true })}
             />
             {errors.name && (
@@ -72,7 +115,7 @@ export function CreateDecor() {
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Describe your decor..."
+              placeholder="Describe your theme..."
               className="min-h-[120px]"
               {...register("description", { required: true })}
             />
@@ -86,7 +129,7 @@ export function CreateDecor() {
           <DialogFooter>
             <DialogClose>
 
-            <Button type="submit">Save Decor</Button>
+            <Button type="submit">Save Theme</Button>
             </DialogClose>
           </DialogFooter>
         </form>

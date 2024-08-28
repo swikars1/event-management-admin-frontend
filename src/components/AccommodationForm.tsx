@@ -54,10 +54,20 @@ export function AccommodationForm({
       description: "",
       address: "",
     },
+    values: oneAccommodation?.responseObject,
   });
 
-  const { mutate } = useMutation({
+  const { mutate: create } = useMutation({
     mutationFn: commonService.create,
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["accommodations"] });
+      reset();
+    },
+  });
+
+  const { mutate: update } = useMutation({
+    mutationFn: commonService.update,
     onSuccess: (res) => {
       console.log(res);
       queryClient.invalidateQueries({ queryKey: ["accommodations"] });
@@ -67,19 +77,27 @@ export function AccommodationForm({
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log("submit called");
-    mutate({ payload: data, resource: "accommodations" });
+    if (id) {
+      update({ payload: data, resource: "accommodations", id });
+    } else {
+      create({ payload: data, resource: "accommodations" });
+    }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        {!id ?<Button variant="outline">+ Create Accommodation</Button> : "asd" }
+        {!id ? (
+          <Button variant="outline">+ Create Accommodation</Button>
+        ) : (
+          <Button variant="outline">Edit</Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Accommodation</DialogTitle>
+          <DialogTitle>{id ? "Edit Accommodation" : "Create New Accommodation"}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to add a new accommodation.
+          Fill out the form below and press save.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">

@@ -3,6 +3,7 @@
 import { AccommodationForm } from "@/components/AccommodationForm";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -39,7 +40,6 @@ export default function Accommodations() {
     deleteById({ id, resource: "accommodations" });
   }
 
-  function handleEdit(id: string) {}
 
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
@@ -50,17 +50,14 @@ export default function Accommodations() {
     actions: [
       {
         component: (
-            <AccommodationForm id={a.id} type="edit"/>
+          <AccommodationForm id={a.id} type="edit" />
         ),
       },
       {
         component: (
-          <DropdownMenuItem
-            onClick={() => handleDelete(a.id)}
-            className="text-red-500"
-          >
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
-          </DropdownMenuItem>
+          </Button>
         ),
       },
     ],

@@ -2,6 +2,7 @@
 
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -41,21 +42,11 @@ export default function Users() {
     role: a.role,
     icon: <Badge variant="outline">User</Badge>,
     actions: [
-      // {
-      //   component: (
-      //     <DropdownMenuItem onClick={() => handleEdit(a.id)}>
-      //       Edit
-      //     </DropdownMenuItem>
-      //   ),
-      // },
       {
         component: (
-          <DropdownMenuItem
-            onClick={() => handleDelete(a.id)}
-            className="text-red-500"
-          >
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
-          </DropdownMenuItem>
+          </Button>
         ),
       },
     ],

@@ -37,9 +37,24 @@ const create = async ({
   return data;
 };
 
+const update = async ({
+  resource,
+  payload,
+  id
+}: {
+  resource: string;
+  payload: any;
+  id: string
+}) => {
+  const { data } = await API.put(`/${resource}/${id}`, payload);
+
+  return data;
+};
+
 export const commonService = {
   getAll,
   getOne,
   create,
+  update,
   deletebyId,
 };

@@ -1,8 +1,9 @@
 "use client";
 
-import { CreateCatering } from "@/components/CreateCatering";
+import { CateringForm } from "@/components/CateringForm";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -36,7 +37,6 @@ export default function Caterings() {
     deleteById({ id, resource: "caterings" });
   }
 
-  function handleEdit(id: string) {}
 
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
@@ -47,19 +47,14 @@ export default function Caterings() {
     actions: [
       {
         component: (
-          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
-            Edit
-          </DropdownMenuItem>
+          <CateringForm id={a.id} type="edit" />
         ),
       },
       {
         component: (
-          <DropdownMenuItem
-            onClick={() => handleDelete(a.id)}
-            className="text-red-500"
-          >
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
-          </DropdownMenuItem>
+          </Button>
         ),
       },
     ],
@@ -72,7 +67,7 @@ export default function Caterings() {
         title="Caterings"
         headers={["id", "name", "description", "menu", "actions"]}
         rows={tableData}
-        createComponent={<CreateCatering />}
+        createComponent={<CateringForm />}
       />
   );
 }

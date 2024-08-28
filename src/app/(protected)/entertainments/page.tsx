@@ -1,8 +1,9 @@
 "use client";
 
-import { CreateEntertainment } from "@/components/CreateEntertainment";
+import { EntertainmentForm } from "@/components/EntertainmentForm";
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -38,7 +39,6 @@ export default function Entertainments() {
     deleteById({ id, resource: "entertainments" });
   }
 
-  function handleEdit(id: string) {}
 
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
@@ -46,22 +46,17 @@ export default function Entertainments() {
     description: a.description,
     type: a.type,
     icon: <Badge variant="outline">Entertainment</Badge>,
-    actions: [
+   actions: [
       {
         component: (
-          <DropdownMenuItem onClick={() => handleEdit(a.id)}>
-            Edit
-          </DropdownMenuItem>
+          <EntertainmentForm id={a.id} type="edit" />
         ),
       },
       {
         component: (
-          <DropdownMenuItem
-            onClick={() => handleDelete(a.id)}
-            className="text-red-500"
-          >
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
-          </DropdownMenuItem>
+          </Button>
         ),
       },
     ],
@@ -73,7 +68,7 @@ export default function Entertainments() {
       title="Entertainments"
       headers={["id", "name", "description", "type", "actions"]}
       rows={tableData}
-      createComponent={<CreateEntertainment />}
+      createComponent={<EntertainmentForm />}
     />
   );
 }

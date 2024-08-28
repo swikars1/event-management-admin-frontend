@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { commonService } from "@/services/common.service";
 
 type Inputs = {
@@ -22,39 +22,83 @@ type Inputs = {
   type: string;
 };
 
-export function CreateEntertainment() {
+
+export function EntertainmentForm({
+  type = "create",
+  id,
+}: {
+  type?: "edit" | "create";
+  id?: string;
+}) {
   const queryClient = useQueryClient();
+
+  const { data: oneEntertainment } = useQuery({
+    queryKey: ["entertainments", id],
+    queryFn: () => {
+      if (id) {
+        return commonService.getOne("entertainments", id);
+      }
+    },
+    enabled: !!id,
+  });
+
+  console.log({ oneEntertainment });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
-  } = useForm<Inputs>();
+    reset,
+  } = useForm<Inputs>({
+    defaultValues: {
+      name: "",
+      description: "",
+      type: "",
+    },
+    values: oneEntertainment?.responseObject,
+  });
 
-  const { mutate } = useMutation({
+  const { mutate: create } = useMutation({
     mutationFn: commonService.create,
     onSuccess: (res) => {
       console.log(res);
       queryClient.invalidateQueries({ queryKey: ["entertainments"] });
-      reset()
+      reset();
+    },
+  });
+
+  const { mutate: update } = useMutation({
+    mutationFn: commonService.update,
+    onSuccess: (res) => {
+      console.log(res);
+      queryClient.invalidateQueries({ queryKey: ["entertainments"] });
+      reset();
     },
   });
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log("submit called");
-    mutate({ payload: data, resource: "entertainments" });
+    if (id) {
+      update({ payload: data, resource: "entertainments", id });
+    } else {
+      create({ payload: data, resource: "entertainments" });
+    }
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">+ Create Entertainment</Button>
+        {!id ? (
+          <Button variant="outline">+ Create Entertainment</Button>
+        ) : (
+          <Button variant="outline">Edit</Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Entertainment</DialogTitle>
+          <DialogTitle>{id ? "Edit Entertainment" : "Create New Entertainment"}</DialogTitle>
           <DialogDescription>
-            Fill out the form below to add a new entertainment.
+            Fill out the form below and press save.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
