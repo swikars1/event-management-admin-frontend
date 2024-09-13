@@ -2,6 +2,7 @@
 
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
+import { socket } from "@/lib/socket";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import { commonService } from "@/services/common.service";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
 
   useEffect(() => {
     if (!token) {
