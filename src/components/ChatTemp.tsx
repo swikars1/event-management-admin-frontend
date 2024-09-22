@@ -5,59 +5,136 @@ import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { socket } from "@/lib/socket";
 import { useSocketConnect } from "@/hooks/useSocketConnect";
 import { useSocketConnectionLogs } from "@/hooks/useSocketConnectionLogs";
 import { useSocketRegister } from "@/hooks/useSocketRegister";
+import { useQuery } from "@tanstack/react-query";
+import { API } from "@/lib/API";
 
 type OnlineUser = { id: string; email: string; role: "ADMIN" | "USER" };
 
+interface ChatHistoryMessage {
+  id: string;
+  chatId: string;
+  senderId: string;
+  message: string;
+  createdAt: string;
+  sender: {
+    id: string;
+    email: string;
+    role: "ADMIN" | "USER";
+  };
+}
+
+interface UserChat {
+  id: string;
+  email: string;
+  lastMessage: string | null;
+  lastMessageTime: string | null;
+}
+
 export function ChatTemp() {
-  const [messages, setMessages] = useState<{ id: string; message: string }[]>(
-    []
-  );
+  const [messages, setMessages] = useState<
+    { id: string; message: string; isUser: boolean; createdAt: string }[]
+  >([]);
   const [input, setInput] = useState("");
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const { data: userChats, isLoading: isLoadingUserChats } = useQuery({
+    queryKey: ["adminUserChats"],
+    queryFn: async () => {
+      const response = await API.get("/chat/admin/user-chats");
+      return response.data.responseObject as UserChat[];
+    },
+  });
+
+  const { data: chatHistory, isLoading: isLoadingChatHistory } = useQuery({
+    queryKey: ["chatHistory", selectedUserId],
+    queryFn: async () => {
+      if (!selectedUserId) return;
+      const response = await API.get(`/chat/${selectedUserId}/history`);
+      return response.data.responseObject as ChatHistoryMessage[];
+    },
+    enabled: !!selectedUserId,
+  });
+
+  console.log({ userChats, chatHistory });
 
   useSocketConnect();
   useSocketConnectionLogs();
   useSocketRegister();
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+  };
+
   useEffect(() => {
-    function onMsg(data) {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: Date.now().toString(), message: data.message },
-      ]);
-      console.log("send_msg_to_admin", data);
-    }
-
-    socket.on("send_msg_to_admin", onMsg);
-
-    return () => {
-      socket.off("send_msg_to_admin", onMsg);
-    };
-  }, []);
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     function onOnlineUsers(users: OnlineUser[]) {
       setOnlineUsers(users);
     }
 
+    function onReceiveMessage(data: { senderId: string; message: string }) {
+      if (data.senderId === selectedUserId) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now().toString(),
+            message: data.message,
+            isUser: true,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      }
+    }
+
     socket.on("online_users", onOnlineUsers);
+    socket.on("receive_message", onReceiveMessage);
 
     return () => {
       socket.off("online_users", onOnlineUsers);
+      socket.off("receive_message", onReceiveMessage);
     };
-  }, []);
+  }, [selectedUserId]);
 
-  const onlineUsersOnly = onlineUsers.filter((user) => user.id !== "ADMIN");
+  const onlineUsersOnly = onlineUsers.filter((user) => user.role !== "ADMIN");
+
+  useEffect(() => {
+    if (chatHistory) {
+      setMessages(
+        chatHistory.map((msg) => ({
+          id: msg.id,
+          message: msg.message,
+          createdAt: msg.createdAt,
+          isUser: msg.sender.role !== "ADMIN", // Use the sender's role to determine if it's a user message
+        }))
+      );
+    }
+  }, [chatHistory]);
 
   function sendMessage(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    socket.emit("msg_sent_from_admin", { message: input });
-    setMessages([...messages, { id: Date.now().toString(), message: input }]);
+    socket.emit("send_message_from_admin", {
+      message: input,
+      recipientId: selectedUserId,
+    });
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        id: Date.now().toString(),
+        message: input,
+        isUser: false,
+        createdAt: new Date().toISOString(),
+      },
+    ]);
 
     setInput("");
   }
@@ -75,49 +152,81 @@ export function ChatTemp() {
         <div className="bg-background rounded-lg shadow-sm">
           <div className="border-b px-4 py-3 font-semibold">Conversations</div>
           <div className="divide-y">
-            {onlineUsers.map((user) => (
-              <Link
-                key={user.id}
-                href="#"
-                className="flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors"
-                prefetch={false}
-              >
-                <Avatar className="w-10 h-10 border">
-                  <AvatarImage src="/placeholder-user.jpg" alt={user.email} />
-                  <AvatarFallback>
-                    {user.email.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="font-medium">{user.email}</div>
-                  <div className="text-sm text-muted-foreground">Online</div>
+            {isLoadingUserChats ? (
+              <div className="p-4">Loading conversations...</div>
+            ) : (
+              userChats?.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => setSelectedUserId(chat.id)}
+                  className={`flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors ${
+                    selectedUserId === chat.id ? "bg-muted" : ""
+                  }`}
+                >
+                  <Avatar className="w-10 h-10 border">
+                    <AvatarImage src="/placeholder-user.jpg" alt={chat.email} />
+                    <AvatarFallback>
+                      {chat.email.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="font-medium">{chat.email}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {chat.lastMessage
+                        ? `${chat.lastMessage.substring(0, 20)}...`
+                        : "No messages yet"}
+                    </div>
+                  </div>
                 </div>
-              </Link>
-            ))}
+              ))
+            )}
           </div>
         </div>
         <div className="bg-background rounded-lg shadow-sm">
           <div className="border-b px-4 py-3 font-semibold">
-            Booking for wedding event
+            {selectedUserId
+              ? `Chat with ${
+                  userChats?.find((chat) => chat.id === selectedUserId)?.email
+                }`
+              : "Select a conversation"}
           </div>
-          <div className="p-4 space-y-4">
-            {messages.map((item) => (
-              <div key={item.id} className="flex items-start gap-4">
-                <Avatar className="w-10 h-10 border">
-                  <AvatarImage src="/placeholder-user.jpg" alt="@username" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 grid gap-1">
-                  <div className="font-medium">John Doe</div>
-                  <div className="text-sm text-muted-foreground">
-                    {item.message}
+          <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            {isLoadingChatHistory ? (
+              <div>Loading chat history...</div>
+            ) : (
+              messages.map((item) => (
+                <div
+                  key={item.id}
+                  className={`flex items-start gap-4 ${
+                    item.isUser ? "justify-end" : ""
+                  }`}
+                >
+                  <Avatar className="w-10 h-10 border">
+                    <AvatarImage
+                      src="/placeholder-user.jpg"
+                      alt={item.isUser ? "User" : "Admin"}
+                    />
+                    <AvatarFallback>{item.isUser ? "U" : "A"}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 grid gap-1">
+                    <div className="font-medium">
+                      {item.isUser ? "User" : "Admin"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {item.message}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(item.createdAt).toLocaleTimeString()}
+                      {/* Display actual message time */}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">2h</div>
                 </div>
-              </div>
-            ))}
-
-            <form onSubmit={sendMessage}>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          {selectedUserId && (
+            <form onSubmit={sendMessage} className="p-4 border-t">
               <div className="flex items-center gap-2">
                 <Input
                   value={input}
@@ -129,133 +238,9 @@ export function ChatTemp() {
                 <Button type="submit">Send</Button>
               </div>
             </form>
-          </div>
+          )}
         </div>
       </main>
     </div>
-  );
-}
-
-function BookAIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-      <path d="m8 13 4-7 4 7" />
-      <path d="M9.1 11h5.7" />
-    </svg>
-  );
-}
-
-function CalendarIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  );
-}
-
-function MessageCircleIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-    </svg>
-  );
-}
-
-function SearchIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
-
-function SettingsIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function UsersIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
   );
 }
