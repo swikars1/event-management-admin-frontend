@@ -11,42 +11,48 @@ import { useSocketConnect } from "@/hooks/useSocketConnect";
 import { useSocketConnectionLogs } from "@/hooks/useSocketConnectionLogs";
 import { useSocketRegister } from "@/hooks/useSocketRegister";
 
+type OnlineUser = { id: string; email: string; role: "ADMIN" | "USER" };
+
 export function ChatTemp() {
   const [messages, setMessages] = useState<{ id: string; message: string }[]>(
     []
   );
   const [input, setInput] = useState("");
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
 
   useSocketConnect();
   useSocketConnectionLogs();
   useSocketRegister();
 
-  // useEffect(() => {
-  //   function onMsg(message: {}) {
-  //     setMessages(messages.concat(message));
-  //   }
-
-  //   socket.on("msg_received", onMsg);
-
-  //   return () => {
-  //     socket.off("msg_received", onMsg);
-  //   };
-  // }, [messages]);
-
   useEffect(() => {
     function onMsg(data) {
-      setMessages([
-        ...messages,
+      setMessages((prevMessages) => [
+        ...prevMessages,
         { id: Date.now().toString(), message: data.message },
       ]);
       console.log("send_msg_to_admin", data);
     }
+
     socket.on("send_msg_to_admin", onMsg);
 
     return () => {
       socket.off("send_msg_to_admin", onMsg);
     };
-  }, [messages]);
+  }, []);
+
+  useEffect(() => {
+    function onOnlineUsers(users: OnlineUser[]) {
+      setOnlineUsers(users);
+    }
+
+    socket.on("online_users", onOnlineUsers);
+
+    return () => {
+      socket.off("online_users", onOnlineUsers);
+    };
+  }, []);
+
+  const onlineUsersOnly = onlineUsers.filter((user) => user.id !== "ADMIN");
 
   function sendMessage(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,57 +75,25 @@ export function ChatTemp() {
         <div className="bg-background rounded-lg shadow-sm">
           <div className="border-b px-4 py-3 font-semibold">Conversations</div>
           <div className="divide-y">
-            <Link
-              href="#"
-              className="flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors"
-              prefetch={false}
-            >
-              <Avatar className="w-10 h-10 border">
-                <AvatarImage src="/placeholder-user.jpg" alt="@username" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="font-medium">John Doe</div>
-                <div className="text-sm text-muted-foreground">
-                  Booking for wedding event
+            {onlineUsers.map((user) => (
+              <Link
+                key={user.id}
+                href="#"
+                className="flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors"
+                prefetch={false}
+              >
+                <Avatar className="w-10 h-10 border">
+                  <AvatarImage src="/placeholder-user.jpg" alt={user.email} />
+                  <AvatarFallback>
+                    {user.email.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="font-medium">{user.email}</div>
+                  <div className="text-sm text-muted-foreground">Online</div>
                 </div>
-              </div>
-              <div className="text-xs text-muted-foreground">2h</div>
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors"
-              prefetch={false}
-            >
-              <Avatar className="w-10 h-10 border">
-                <AvatarImage src="/placeholder-user.jpg" alt="@username" />
-                <AvatarFallback>JA</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="font-medium">Jane Appleseed</div>
-                <div className="text-sm text-muted-foreground">
-                  Booking for corporate event
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground">1d</div>
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors"
-              prefetch={false}
-            >
-              <Avatar className="w-10 h-10 border">
-                <AvatarImage src="/placeholder-user.jpg" alt="@username" />
-                <AvatarFallback>SM</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="font-medium">Sarah Musk</div>
-                <div className="text-sm text-muted-foreground">
-                  Booking for birthday party
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground">3d</div>
-            </Link>
+              </Link>
+            ))}
           </div>
         </div>
         <div className="bg-background rounded-lg shadow-sm">

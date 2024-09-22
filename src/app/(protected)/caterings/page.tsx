@@ -37,7 +37,6 @@ export default function Caterings() {
     deleteById({ id, resource: "caterings" });
   }
 
-
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
     name: a.name,
@@ -46,9 +45,7 @@ export default function Caterings() {
     icon: <Badge variant="outline">Catering</Badge>,
     actions: [
       {
-        component: (
-          <CateringForm id={a.id} type="edit" />
-        ),
+        component: <CateringForm id={a.id} type="edit" />,
       },
       {
         component: (
@@ -61,13 +58,12 @@ export default function Caterings() {
   }));
 
   return (
-
-      <MainTable
-        caption="List of all caterings of our app."
-        title="Caterings"
-        headers={["id", "name", "description", "menu", "actions"]}
-        rows={tableData}
-        createComponent={<CateringForm />}
-      />
+    <MainTable
+      caption="List of all caterings of our app."
+      title="Caterings"
+      headers={["id", "name", "description", "menu", "actions"]}
+      rows={tableData}
+      createComponent={<CateringForm />}
+    />
   );
 }
