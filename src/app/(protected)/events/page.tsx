@@ -3,6 +3,14 @@
 import { MainTable } from "@/components/MainTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/use-toast";
 import { commonService } from "@/services/common.service";
@@ -63,32 +71,37 @@ export default function Events() {
     deleteById({ id, resource: "events" });
   }
 
+  function handleShow(id: string) {}
+
   function handleApprove(id: string) {
-    approve({id, payload: {status: "SCHEDULED"}, resource: "events"});
+    approve({ id, payload: { status: "SCHEDULED" }, resource: "events" });
   }
 
   function handleUnapprove(id: string) {
-    unapprove({id, payload: {status: "DRAFT"}, resource: "events"});
+    unapprove({ id, payload: { status: "DRAFT" }, resource: "events" });
   }
 
   const tableData = data?.responseObject?.map((a) => ({
     id: a.id,
     title: a.title,
     description: a.description,
-    startDate: a.startDate,
-    endDate: a.endDate,
+    startDate: new Date(a.startDate).toLocaleDateString(),
+    endDate: new Date(a.endDate).toLocaleDateString(),
     location: a.location,
     icon: <Badge variant="outline">Event</Badge>,
     actions: [
       {
         component: (
-          <Button variant={a.status === "DRAFT" ? "secondary" : "outline"} onClick={() => {
-            if (a.status === "DRAFT") {
-              handleApprove(a.id)
-            } else {
-              handleUnapprove(a.id)
-            }
-          }}>
+          <Button
+            variant={a.status === "DRAFT" ? "secondary" : "outline"}
+            onClick={() => {
+              if (a.status === "DRAFT") {
+                handleApprove(a.id);
+              } else {
+                handleUnapprove(a.id);
+              }
+            }}
+          >
             {a.status === "DRAFT" ? "Approve" : "Unapprove"}
           </Button>
         ),
@@ -98,6 +111,66 @@ export default function Events() {
           <Button variant="destructive" onClick={() => handleDelete(a.id)}>
             Delete
           </Button>
+        ),
+      },
+      {
+        component: (
+          <Dialog>
+            <DialogTrigger>
+              <Button variant="outline">Show</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Booking Details</DialogTitle>
+                <DialogDescription className="space-y-2">
+                  <div className="mt-3">
+                    <span className="font-bold">Title:</span> {a.title}
+                  </div>
+                  <div>
+                    <span className="font-bold">Description:</span>{" "}
+                    {a.description}
+                  </div>
+                  <div>
+                    <span className="font-bold"> Start Date:</span>{" "}
+                    {new Date(a.startDate).toLocaleDateString()}
+                  </div>
+                  <div>
+                    <span className="font-bold"> End Date:</span>{" "}
+                    {new Date(a.endDate).toLocaleDateString()}
+                  </div>
+                  <div>
+                    <span className="font-bold">Location:</span> {a.location}
+                  </div>
+                  <div>
+                    <span className="font-bold">Accommodation: </span>{" "}
+                    {a.accommodation?.name}
+                  </div>
+
+                  <div>
+                    <span className="font-bold">Entertainment:</span>{" "}
+                    {a.entertainment?.name}
+                  </div>
+                  <div>
+                    <span className="font-bold">Catering:</span>{" "}
+                    {a.catering?.name}
+                  </div>
+                  <div>
+                    <span className="font-bold">Theme:</span> {a.theme?.name}
+                  </div>
+                  <div>
+                    <span className="font-bold">Decor:</span> {a.decor?.name}
+                  </div>
+                  <div>
+                    <span className="font-bold">Status:</span> {a.status}
+                  </div>
+                  <div>
+                    <span className="font-bold">Booked At:</span>{" "}
+                    {new Date(a.createdAt).toLocaleDateString()}
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         ),
       },
     ],
