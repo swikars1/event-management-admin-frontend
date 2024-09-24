@@ -109,7 +109,7 @@ export default function Events() {
                   </div>
                   <div>
                     <span className="font-bold">Booked by:</span>{" "}
-                    {`${a.organizer.name} (${a.organizer.email})`}
+                    {`${a.organizer?.name} (${a.organizer?.email})`}
                   </div>
                   <div>
                     <span className="font-bold"> Start Date:</span>{" "}
