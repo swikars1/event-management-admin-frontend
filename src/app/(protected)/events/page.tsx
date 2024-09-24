@@ -92,43 +92,24 @@ export default function Events() {
     actions: [
       {
         component: (
-          <Button
-            variant={a.status === "DRAFT" ? "secondary" : "outline"}
-            onClick={() => {
-              if (a.status === "DRAFT") {
-                handleApprove(a.id);
-              } else {
-                handleUnapprove(a.id);
-              }
-            }}
-          >
-            {a.status === "DRAFT" ? "Approve" : "Unapprove"}
-          </Button>
-        ),
-      },
-      {
-        component: (
-          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
-            Delete
-          </Button>
-        ),
-      },
-      {
-        component: (
           <Dialog>
             <DialogTrigger>
-              <Button variant="outline">Show</Button>
+              <Button variant="outline">Details</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Booking Details</DialogTitle>
                 <DialogDescription className="space-y-2">
                   <div className="mt-3">
-                    <span className="font-bold">Title:</span> {a.title}
+                    <span className="font-bold">Event Title:</span> {a.title}
                   </div>
                   <div>
-                    <span className="font-bold">Description:</span>{" "}
+                    <span className="font-bold">Event Description:</span>{" "}
                     {a.description}
+                  </div>
+                  <div>
+                    <span className="font-bold">Booked by:</span>{" "}
+                    {`${a.organizer.name} (${a.organizer.email})`}
                   </div>
                   <div>
                     <span className="font-bold"> Start Date:</span>{" "}
@@ -171,6 +152,29 @@ export default function Events() {
               </DialogHeader>
             </DialogContent>
           </Dialog>
+        ),
+      },
+      {
+        component: (
+          <Button
+            variant={a.status === "DRAFT" ? "secondary" : "outline"}
+            onClick={() => {
+              if (a.status === "DRAFT") {
+                handleApprove(a.id);
+              } else {
+                handleUnapprove(a.id);
+              }
+            }}
+          >
+            {a.status === "DRAFT" ? "Approve" : "Unapprove"}
+          </Button>
+        ),
+      },
+      {
+        component: (
+          <Button variant="destructive" onClick={() => handleDelete(a.id)}>
+            Delete
+          </Button>
         ),
       },
     ],
