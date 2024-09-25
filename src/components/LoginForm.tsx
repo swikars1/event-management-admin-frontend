@@ -44,8 +44,8 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-orange-200">
+      <Card className="w-full max-w-md bg-blue-100">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-3xl font-bold">Login</CardTitle>
@@ -82,7 +82,10 @@ export function LoginForm() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
+            <Button
+              className="w-full bg-orange-400 hover:bg-orange-300"
+              type="submit"
+            >
               Login
             </Button>
           </CardFooter>
